@@ -1,0 +1,174 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import {
+  DEFAULT_LANG,
+  GUARDRAILS,
+  LANG_IDS,
+  LANG_LIST,
+  STYLE_LIST,
+  STYLE_IDS,
+  VIEWS,
+  contextFor,
+  langFor,
+  langIdList,
+  parseRequest,
+  promptFor,
+  styleIdList,
+  viewOf,
+  voiceFor,
+} from '../styles.js'
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+const root = path.resolve(here, '..')
+const client = fs.readFileSync(path.join(root, 'client.js'), 'utf8')
+const hangul = /[\u3131-\u318E\uAC00-\uD7A3]/u
+const kana = /[\u3040-\u30FF]/u
+const han = /[\u4E00-\u9FFF]/u
+
+function clientDict(name) {
+  const match = new RegExp('const ' + name + ' = \\{([\\s\\S]*?)\\n    \\}\\n', 'm').exec(client)
+  assert.ok(match, `client ${name} dictionary`)
+  return match[1]
+}
+
+function dictionaryKeys(block) {
+  return [...block.matchAll(/(?:'([^']+)'|([A-Za-z_][A-Za-z0-9_]*)):/g)].map(match => match[1] ?? match[2])
+}
+
+test('host catalogue and ids', () => {
+  assert.equal(STYLE_LIST.length, 7)
+  assert.deepEqual([...STYLE_IDS], ['off', 'moe', 'cat', 'tsundere', 'kuudere', 'genki', 'oneesan'])
+  assert.equal(LANG_LIST.length, 3)
+  assert.equal(DEFAULT_LANG, 'ko')
+  assert.equal(styleIdList(), 'off, moe, cat, tsundere, kuudere, genki, oneesan')
+  assert.equal(langIdList(), 'en, ja, ko')
+  assert.equal(voiceFor('missing').id, 'off')
+  assert.equal(langFor('missing').id, DEFAULT_LANG)
+})
+
+test('command grammar', () => {
+  const cases = [
+    ['', 'info', undefined],
+    ['   ', 'info', undefined],
+    ['list', 'info', undefined],
+    ['LIST', 'info', undefined],
+    ['moe', 'set', { style: 'moe' }],
+    [' MOE ', 'set', { style: 'moe' }],
+    ['moe ja', 'set', { style: 'moe', lang: 'ja' }],
+    ['moe KO', 'set', { style: 'moe', lang: 'ko' }],
+    ['lang en', 'set', { lang: 'en' }],
+    ['lang JA', 'set', { lang: 'ja' }],
+    ['en', 'set', { lang: 'en' }],
+    ['ko', 'set', { lang: 'ko' }],
+    ['off', 'set', { style: 'off' }],
+    ['off en', 'set', { style: 'off', lang: 'en' }],
+    ['bogus', 'invalid', undefined],
+    ['lang', 'invalid', undefined],
+    ['lang bogus', 'invalid', undefined],
+    ['moe bogus', 'invalid', undefined],
+    ['moe ja extra', 'invalid', undefined],
+    ['list extra', 'invalid', undefined],
+    ['en moe', 'invalid', undefined],
+    [undefined, 'info', undefined],
+  ]
+  for (const [input, kind, expected] of cases) {
+    const request = parseRequest(input)
+    assert.equal(request.kind, kind, `kind for ${JSON.stringify(input)}`)
+    if (expected !== undefined) {
+      assert.equal(request.style, expected.style, `style for ${JSON.stringify(input)}`)
+      assert.equal(request.lang, expected.lang, `lang for ${JSON.stringify(input)}`)
+    }
+  }
+})
+
+test('projection fold changes only on valid set requests', () => {
+  const apply = (state, args) => {
+    const request = parseRequest(args)
+    if (request.kind !== 'set') return state
+    const style = request.style ?? state.style
+    const lang = request.lang ?? state.lang
+    if (style === state.style && lang === state.lang) return state
+    return { style, lang }
+  }
+  const initial = { style: 'off', lang: 'ko' }
+  assert.equal(apply(initial, ''), initial)
+  assert.equal(apply(initial, 'bogus'), initial)
+  const styleOnly = apply(initial, 'moe')
+  assert.deepEqual(styleOnly, { style: 'moe', lang: 'ko' })
+  const both = apply(styleOnly, 'moe ja')
+  assert.deepEqual(both, { style: 'moe', lang: 'ja' })
+  const langOnly = apply(both, 'lang en')
+  assert.deepEqual(langOnly, { style: 'moe', lang: 'en' })
+  assert.equal(apply(langOnly, 'moe en'), langOnly)
+  assert.equal(apply(langOnly, 'en'), langOnly)
+})
+
+test('prompt and context variants use the selected language', () => {
+  for (const style of STYLE_LIST) {
+    for (const lang of ['en', 'ja', 'ko']) {
+      assert.ok(style.names[lang], `name ${style.id}/${lang}`)
+      assert.ok(lang in style.prompts, `prompt ${style.id}/${lang}`)
+      const prompt = promptFor(style, lang)
+      const context = contextFor(style, lang)
+      if (style.id === 'off') {
+        assert.equal(prompt, '')
+        assert.equal(context, '')
+        continue
+      }
+      assert.ok(prompt.startsWith(GUARDRAILS[lang]), `guardrails ${style.id}/${lang}`)
+      assert.ok(context.startsWith('[moeseek]'), `context ${style.id}/${lang}`)
+      assert.ok(!prompt.includes('{{'), `interpolation ${style.id}/${lang}`)
+      if (lang === 'en') {
+        assert.ok(!hangul.test(prompt) && !hangul.test(context), `English purity ${style.id}`)
+      } else if (lang === 'ja') {
+        assert.ok(kana.test(prompt) && kana.test(context), `Japanese kana ${style.id}`)
+        assert.ok(!hangul.test(prompt) && !hangul.test(context), `Japanese purity ${style.id}`)
+      } else {
+        assert.ok(hangul.test(prompt) && hangul.test(context), `Korean Hangul ${style.id}`)
+      }
+    }
+  }
+})
+
+test('projection views are stable for every style and language pair', () => {
+  assert.equal(Object.keys(VIEWS).length, STYLE_LIST.length * LANG_LIST.length)
+  for (const style of STYLE_LIST) {
+    for (const lang of LANG_LIST) {
+      const view = viewOf(style.id, lang.id)
+      assert.equal(view, viewOf(style.id, lang.id))
+      assert.deepEqual(view, { style: style.id, lang: lang.id })
+    }
+  }
+})
+
+test('client catalogue matches the host catalogue', () => {
+  const clientStyles = [...client.matchAll(/\{ id: '([^']+)', mark: /g)].map(match => match[1])
+  assert.deepEqual(clientStyles, [...STYLE_IDS])
+  const languages = /const LANGUAGES = \[([^\]]+)\]/.exec(client)
+  assert.ok(languages, 'client LANGUAGES')
+  const clientLangs = [...languages[1].matchAll(/'([^']+)'/g)].map(match => match[1])
+  assert.deepEqual(clientLangs, [...LANG_IDS])
+})
+
+test('client dictionaries have identical keys and clean scripts', () => {
+  const blocks = {
+    en: clientDict('en'),
+    ko: clientDict('ko'),
+    ja: clientDict('ja'),
+    zh: clientDict('zh'),
+  }
+  const keys = Object.fromEntries(Object.entries(blocks).map(([name, block]) => [name, dictionaryKeys(block)]))
+  const base = keys.en
+  assert.equal(new Set(base).size, base.length, 'English duplicate keys')
+  for (const [name, list] of Object.entries(keys)) {
+    assert.equal(new Set(list).size, list.length, `${name} duplicate keys`)
+    assert.deepEqual([...list].sort(), [...base].sort(), `${name} key parity`)
+  }
+  assert.ok(!hangul.test(blocks.en), 'English dictionary has Hangul')
+  assert.ok(hangul.test(blocks.ko), 'Korean dictionary missing Hangul')
+  assert.ok(kana.test(blocks.ja), 'Japanese dictionary missing kana')
+  assert.ok(han.test(blocks.zh), 'Chinese dictionary missing Han')
+})
