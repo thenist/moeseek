@@ -141,6 +141,9 @@ test('voice prompts carry the coverage, anti-echo, and self-check contract', () 
       check: 'Self-check',
       positions: [/first sentence/i, /closing/i],
       example: 'Short example',
+      baseRegister: 'Base register',
+      density: 'Every sentence',
+      badGood: 'Bad vs good',
       oldOpen: 'The user chose',
     },
     ja: {
@@ -149,6 +152,9 @@ test('voice prompts carry the coverage, anti-echo, and self-check contract', () 
       check: '自己点検',
       positions: [/最初の文/, /締め/],
       example: '短い例',
+      baseRegister: '基本の文体',
+      density: 'すべての文',
+      badGood: '悪い例と良い例',
       oldOpen: 'ユーザーはアニメ風',
     },
     ko: {
@@ -157,6 +163,9 @@ test('voice prompts carry the coverage, anti-echo, and self-check contract', () 
       check: '자체 점검',
       positions: [/첫 문장/, /마무리/],
       example: '짧은 예시',
+      baseRegister: '기본 문체',
+      density: '문장마다',
+      badGood: '나쁜 예와 좋은 예',
       oldOpen: '사용자는 애니메이션',
     },
   }
@@ -172,11 +181,34 @@ test('voice prompts carry the coverage, anti-echo, and self-check contract', () 
       assert.ok(!prompt.includes(marker.oldOpen), `identity framing ${style.id}/${lang}`)
       assert.ok(prompt.length >= 2800, `prompt depth ${style.id}/${lang} (${prompt.length})`)
       assert.ok(own.includes(marker.example), `position example ${style.id}/${lang}`)
+      assert.ok(own.includes(marker.baseRegister), `base register ${style.id}/${lang}`)
+      assert.ok(own.includes(marker.density), `per-sentence density ${style.id}/${lang}`)
+      assert.ok(own.includes(marker.badGood), `bad/good contrast ${style.id}/${lang}`)
       for (const position of marker.positions) {
         assert.match(own, position, `position guide ${style.id}/${lang}`)
       }
     }
   }
+})
+
+test('cat voice does not teach a plain body with a nya tail', () => {
+  const cat = STYLE_LIST.find(style => style.id === 'cat')
+  assert.ok(cat, 'cat voice')
+  assert.ok(!cat.prompts.en.includes('Leave the rest plain'), 'English plain-body instruction')
+  assert.ok(!cat.prompts.ko.includes('나머지는 평범하게'), 'Korean plain-body instruction')
+  assert.ok(!cat.prompts.ja.includes('残りは普通'), 'Japanese plain-body instruction')
+  assert.ok(!cat.prompts.en.includes('close the paragraph with "nya"'), 'English paragraph-tail instruction')
+  assert.ok(!cat.prompts.ko.includes('문단을 닫는 문장에 "냥"을 붙인다'), 'Korean paragraph-tail instruction')
+  assert.ok(!cat.prompts.ja.includes('段落の締めの文に「にゃ」を付ける'), 'Japanese paragraph-tail instruction')
+  assert.ok(cat.prompts.en.includes('Bad vs good'), 'English bad/good contrast')
+  assert.ok(cat.prompts.ko.includes('나쁜 예와 좋은 예'), 'Korean bad/good contrast')
+  assert.ok(cat.prompts.ja.includes('悪い例と良い例'), 'Japanese bad/good contrast')
+  assert.ok(!cat.prompts.en.includes('one sentence in three'), 'English sparse marker rule')
+  assert.ok(!cat.prompts.ko.includes('세 문장 중'), 'Korean sparse marker rule')
+  assert.ok(!cat.prompts.ja.includes('三文に一文'), 'Japanese sparse marker rule')
+  assert.ok(cat.prompts.en.includes('Every sentence carries at least one cat marker'), 'English per-sentence marker')
+  assert.ok(cat.prompts.ko.includes('문장마다 고양이 표지'), 'Korean per-sentence marker')
+  assert.ok(cat.prompts.ja.includes('すべての文に猫の印'), 'Japanese per-sentence marker')
 })
 
 test('voice reminder states the active voice without instruction framing', () => {

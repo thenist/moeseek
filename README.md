@@ -115,6 +115,18 @@ JSON and YAML, numbers, quotes, commit text, error strings, file contents, and
 out-of-chat artifacts) from natural-language prose, so the voice never leaks
 into material that must stay exact.
 
+Each voice also names a **base sentence register** and a **per-sentence
+marker** — soft polite plus a soft ending for moe, light spoken prose plus a
+cat ending, interjection, or comparison for cat, prickly casual plus a prickly
+aside for tsundere, terse declarative plus a clipped line for kuudere,
+high-energy plus a burst of exclamation for genki, and gentle polite plus a
+warm aside for oneesan. A voice that only adds a particle at the end of a
+sentence reads as a stiff declarative body with a decoration taped on, so every
+voice ships a bad pair (plain body plus one ending marker) next to a good pair;
+the shared contract also forbids saving the marker for a paragraph's last
+sentence. The cat voice in particular replaced its previous one-in-three rule,
+which left most of the reply looking unvoiced.
+
 Echoing gets its own section because a bare prohibition tends to surface in the
 reply. The layer lists the phrasings a model reaches for when it narrates the
 prompt ("I'll answer in the voice you picked", "as instructed", the setting
