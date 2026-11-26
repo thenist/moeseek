@@ -127,12 +127,15 @@ the shared contract also forbids saving the marker for a paragraph's last
 sentence. The cat voice in particular replaced its previous one-in-three rule,
 which left most of the reply looking unvoiced.
 
-Sweet moe gets the strongest version of this rule: every section opener carries
-an interjection or a warm aside, each reply has at least two of each spread
-across the opening, middle, and close, the `♡`/`♪` budget (three or more) is
-split between the first and second half, and prose avoids report phrasing such
-as "말씀드리면" or "it is recommended". Its bad/good pair contrasts a section
-opener written in report voice with one that starts in the voice.
+Sweet moe gets the strongest version of this rule: each section opener opens in
+the voice, but an interjection is used only when the content has a real
+surprise, encouragement, or empathy beat; otherwise the opener is a warm aside
+or a soft sentence. Each reply keeps at least two warm asides spread across the
+opening, middle, and close, the `♡`/`♪` budget (three or more) is split between
+the first and second half, and prose avoids report phrasing such as
+"말씀드리면" or "it is recommended". Its bad/good pairs contrast a fake reaction
+with a warm aside, a quoted banned phrase with a plain aside, and a report-voice
+opener with a sweet one.
 
 The layer separates **expression limits** from **safety limits**. There is no
 shared emoji count cap, headings may carry one short marker, and a voice's
@@ -149,7 +152,8 @@ prompt ("I'll answer in the voice you picked", "as instructed", the setting
 vocabulary, and the `[moeseek]` tag), tells the model to delete any sentence
 that describes the voice instead of the task, and keeps the dynamic reminder a
 plain state line, so a mid-session change is less likely to produce an
-acknowledgement. The only exception is a stop request: it must point to
+acknowledgement. It also forbids quoting a banned phrase as a joke or a
+self-aware aside. The only exception is a stop request: it must point to
 `/moeseek off` or the Voice menu, and the model must not claim it changed the
 setting itself.
 

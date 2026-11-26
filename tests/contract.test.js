@@ -211,21 +211,33 @@ test('cat voice does not teach a plain body with a nya tail', () => {
   assert.ok(cat.prompts.ja.includes('すべての文に猫の印'), 'Japanese per-sentence marker')
 })
 
-test('sweet moe carries a section-opener and interjection rhythm', () => {
+test('sweet moe fits its markers to the content', () => {
   const moe = STYLE_LIST.find(style => style.id === 'moe')
   assert.ok(moe, 'moe voice')
   assert.ok(moe.prompts.ko.includes('섹션 첫 문장'), 'Korean section opener')
   assert.ok(moe.prompts.en.includes('Section opener'), 'English section opener')
   assert.ok(moe.prompts.ja.includes('セクション最初の文'), 'Japanese section opener')
-  assert.ok(moe.prompts.ko.includes('감탄사 2회'), 'Korean interjection rhythm')
-  assert.ok(moe.prompts.en.includes('two interjections'), 'English interjection rhythm')
-  assert.ok(moe.prompts.ja.includes('感嘆詞を二回'), 'Japanese interjection rhythm')
+  assert.ok(moe.prompts.ko.includes('진짜 놀라움'), 'Korean interjection fit')
+  assert.ok(moe.prompts.en.includes('real surprise'), 'English interjection fit')
+  assert.ok(moe.prompts.ja.includes('本当の驚き'), 'Japanese interjection fit')
+  assert.ok(moe.prompts.ko.includes('금지된 표현을 농담으로 인용하지 않는다'), 'Korean meta-joke ban')
+  assert.ok(moe.prompts.en.includes('Quoting a banned phrase as a joke'), 'English meta-joke ban')
+  assert.ok(moe.prompts.ja.includes('禁止された表現を冗談として引用しない'), 'Japanese meta-joke ban')
   assert.ok(moe.prompts.ko.includes('3개 이상'), 'Korean affection freedom')
   assert.ok(moe.prompts.en.includes('three or more'), 'English affection freedom')
   assert.ok(moe.prompts.ja.includes('三個以上'), 'Japanese affection freedom')
   assert.ok(moe.prompts.ko.includes('나쁜 예(섹션 첫 문장)'), 'Korean section-opener contrast')
   assert.ok(moe.prompts.en.includes('Bad (section opener)'), 'English section-opener contrast')
   assert.ok(moe.prompts.ja.includes('悪い例(セクション最初)'), 'Japanese section-opener contrast')
+  assert.ok(moe.prompts.ko.includes('나쁜 예(감탄사)') && moe.prompts.ko.includes('나쁜 예(메타)'), 'Korean fit contrast')
+  assert.ok(moe.prompts.en.includes('Bad (interjection)') && moe.prompts.en.includes('Bad (meta)'), 'English fit contrast')
+  assert.ok(moe.prompts.ja.includes('悪い例(感嘆詞)') && moe.prompts.ja.includes('悪い例(メタ)'), 'Japanese fit contrast')
+})
+
+test('banned phrases cannot be quoted as jokes', () => {
+  assert.ok(GUARDRAILS.en.includes('Never quote a banned phrase as a joke'), 'English meta-joke ban')
+  assert.ok(GUARDRAILS.ko.includes('농담이나 자기 언급'), 'Korean meta-joke ban')
+  assert.ok(GUARDRAILS.ja.includes('冗談や自己言及'), 'Japanese meta-joke ban')
 })
 
 test('expression caps are lifted outside safety zones', () => {
