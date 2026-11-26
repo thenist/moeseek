@@ -119,7 +119,7 @@ test('prompt and context variants use the selected language', () => {
         continue
       }
       assert.ok(prompt.startsWith(GUARDRAILS[lang]), `guardrails ${style.id}/${lang}`)
-      assert.ok(context.startsWith('[moeseek]'), `context ${style.id}/${lang}`)
+      assert.ok(context.length > 0, `context ${style.id}/${lang}`)
       assert.ok(!prompt.includes('{{'), `interpolation ${style.id}/${lang}`)
       if (lang === 'en') {
         assert.ok(!hangul.test(prompt) && !hangul.test(context), `English purity ${style.id}`)
@@ -129,6 +129,71 @@ test('prompt and context variants use the selected language', () => {
       } else {
         assert.ok(hangul.test(prompt) && hangul.test(context), `Korean Hangul ${style.id}`)
       }
+    }
+  }
+})
+
+test('voice prompts carry the coverage, anti-echo, and self-check contract', () => {
+  const markers = {
+    en: {
+      coverage: 'first sentence',
+      meta: 'meta',
+      check: 'Self-check',
+      positions: [/first sentence/i, /closing/i],
+      example: 'Short example',
+      oldOpen: 'The user chose',
+    },
+    ja: {
+      coverage: '最初の文',
+      meta: 'メタ',
+      check: '自己点検',
+      positions: [/最初の文/, /締め/],
+      example: '短い例',
+      oldOpen: 'ユーザーはアニメ風',
+    },
+    ko: {
+      coverage: '첫 문장',
+      meta: '메타',
+      check: '자체 점검',
+      positions: [/첫 문장/, /마무리/],
+      example: '짧은 예시',
+      oldOpen: '사용자는 애니메이션',
+    },
+  }
+  for (const style of STYLE_LIST) {
+    if (style.id === 'off') continue
+    for (const lang of ['en', 'ja', 'ko']) {
+      const marker = markers[lang]
+      const prompt = promptFor(style, lang)
+      const own = style.prompts[lang]
+      assert.ok(prompt.includes(marker.coverage), `coverage ${style.id}/${lang}`)
+      assert.ok(prompt.includes(marker.meta), `anti-echo ${style.id}/${lang}`)
+      assert.ok(prompt.includes(marker.check), `self-check ${style.id}/${lang}`)
+      assert.ok(!prompt.includes(marker.oldOpen), `identity framing ${style.id}/${lang}`)
+      assert.ok(prompt.length >= 2800, `prompt depth ${style.id}/${lang} (${prompt.length})`)
+      assert.ok(own.includes(marker.example), `position example ${style.id}/${lang}`)
+      for (const position of marker.positions) {
+        assert.match(own, position, `position guide ${style.id}/${lang}`)
+      }
+    }
+  }
+})
+
+test('voice reminder states the active voice without instruction framing', () => {
+  const banned = {
+    en: /instruction|system prompt|\bmode\b/i,
+    ja: /指示|システムプロンプト|モード/,
+    ko: /지시|시스템 프롬프트|모드/,
+  }
+  const coverage = { en: 'first sentence', ja: '最初の文', ko: '첫 문장' }
+  for (const style of STYLE_LIST) {
+    if (style.id === 'off') continue
+    for (const lang of ['en', 'ja', 'ko']) {
+      const context = contextFor(style, lang)
+      assert.ok(context.includes(style.names[lang]), `reminder name ${style.id}/${lang}`)
+      assert.ok(context.includes(coverage[lang]), `reminder coverage ${style.id}/${lang}`)
+      assert.doesNotMatch(context, banned[lang], `reminder echo priming ${style.id}/${lang}`)
+      assert.ok(!context.includes('[moeseek]'), `reminder tag ${style.id}/${lang}`)
     }
   }
 })

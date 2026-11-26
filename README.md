@@ -84,11 +84,12 @@ voice rules.
 
 ## How it works
 
-- **System prompt**: one scoped section per agent carries the guardrails and
-  the full voice rules in the selected prompt language.
+- **System prompt**: one scoped section per agent carries the delivery contract
+  and the full voice rules in the selected prompt language.
 - **Dynamic context**: one scoped context carries a short reminder in the
-  selected prompt language, so a style or language change reaches the model
-  with the next admitted request.
+  selected prompt language, phrased as a state line rather than a request, so
+  a style or language change reaches the model with the next admitted request
+  without inviting an acknowledgement.
 - **Durable selection**: the session-scoped `moeseek` projection folds the last
   `/moeseek` invocation from durable `command/run` events. It stores both the
   style and the prompt language, so the choice survives resume and needs no
@@ -96,13 +97,37 @@ voice rules.
 - **One write path**: the menu submits the same `/moeseek` command line as the
   slash command; the durable projection frame is the confirmation.
 
-The prompt instructs the model to keep code blocks, shell commands, paths,
-identifiers, API names, JSON and YAML, numbers, quoted text, commit messages,
-error strings, file contents, and tool messages free of the voice. The voice
-applies only to natural-language chat prose. The instructions also tell it to
-stand down for serious warnings, sensitive or dangerous topics, and distressed
-users, and to direct a stop request to `/moeseek off` rather than claiming it
-changed the setting itself.
+### Prompt design
+
+The voice layer is deliberately verbose, because a short tone prompt tends to
+be satisfied with one flavored line at the end. The layer states a
+position-by-position contract instead: the voice starts in the first sentence,
+stays in every prose paragraph, and covers openings, plans, transitions,
+code-adjacent prose, progress notes, cautions, summaries, and closings. Each
+voice also ships a short question-and-answer example that shows the tone spread
+across the whole reply, not appended to its end, and the shared rules close
+with an eight-point self-check that asks the model to look for a neutral body
+with a cute coda and to verify that no "checked" or "passed" claim describes
+something it did not observe.
+
+The contract separates byte-exact zones (code, commands, paths, identifiers,
+JSON and YAML, numbers, quotes, commit text, error strings, file contents, and
+out-of-chat artifacts) from natural-language prose, so the voice never leaks
+into material that must stay exact.
+
+Echoing gets its own section because a bare prohibition tends to surface in the
+reply. The layer lists the phrasings a model reaches for when it narrates the
+prompt ("I'll answer in the voice you picked", "as instructed", the setting
+vocabulary, and the `[moeseek]` tag), tells the model to delete any sentence
+that describes the voice instead of the task, and keeps the dynamic reminder a
+plain state line, so a mid-session change is less likely to produce an
+acknowledgement. The only exception is a stop request: it must point to
+`/moeseek off` or the Voice menu, and the model must not claim it changed the
+setting itself.
+
+Cuteness drops for warnings, danger, sensitive topics, and distressed users,
+and the layer never describes physical actions or impersonates a copyrighted
+character.
 
 ## Limits
 
@@ -117,6 +142,8 @@ changed the setting itself.
   `/moeseek <style> [en|ja|ko]` from any command-capable client.
 - The style is tone-only. It does not change tools, permissions, models, or
   answer length. The guardrails are prompt instructions, not a hard filter.
+- The layer is intentionally verbose, several thousand characters per voice,
+  and it rides in every request while a voice is enabled.
 - After installing or updating the bundle, refresh the Web page once so the
   page loads the current client half. An in-place update that the running Host
   cannot compare may require a DSH restart to load the new Host code; the page
@@ -132,7 +159,7 @@ changed the setting itself.
 | `cordis.patch.yml` | Inserts the `moeseek` Host row. |
 | `locale/*.json` | Plugin Manager title and description in English, Korean, Japanese, and Chinese. |
 | `icon.svg` | Original cat-eared speech-bubble icon. |
-| `tests/contract.test.js` | Catalogue, grammar, fold, prompt-language, and locale-parity tests; run `node --test tests/contract.test.js` (or `pnpm test`). |
+| `tests/contract.test.js` | Catalogue, grammar, fold, prompt-language, delivery-contract, and locale-parity tests; run `node --test tests/contract.test.js` (or `pnpm test`). |
 
 The Host half imports no Harness package, so the bundle installs without
 resolving extra dependencies. The client half uses only the browser's React
