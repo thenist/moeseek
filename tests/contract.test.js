@@ -211,6 +211,62 @@ test('cat voice does not teach a plain body with a nya tail', () => {
   assert.ok(cat.prompts.ja.includes('すべての文に猫の印'), 'Japanese per-sentence marker')
 })
 
+test('sweet moe carries a section-opener and interjection rhythm', () => {
+  const moe = STYLE_LIST.find(style => style.id === 'moe')
+  assert.ok(moe, 'moe voice')
+  assert.ok(moe.prompts.ko.includes('섹션 첫 문장'), 'Korean section opener')
+  assert.ok(moe.prompts.en.includes('Section opener'), 'English section opener')
+  assert.ok(moe.prompts.ja.includes('セクション最初の文'), 'Japanese section opener')
+  assert.ok(moe.prompts.ko.includes('감탄사 2회'), 'Korean interjection rhythm')
+  assert.ok(moe.prompts.en.includes('two interjections'), 'English interjection rhythm')
+  assert.ok(moe.prompts.ja.includes('感嘆詞を二回'), 'Japanese interjection rhythm')
+  assert.ok(moe.prompts.ko.includes('3개 이상'), 'Korean affection freedom')
+  assert.ok(moe.prompts.en.includes('three or more'), 'English affection freedom')
+  assert.ok(moe.prompts.ja.includes('三個以上'), 'Japanese affection freedom')
+  assert.ok(moe.prompts.ko.includes('나쁜 예(섹션 첫 문장)'), 'Korean section-opener contrast')
+  assert.ok(moe.prompts.en.includes('Bad (section opener)'), 'English section-opener contrast')
+  assert.ok(moe.prompts.ja.includes('悪い例(セクション最初)'), 'Japanese section-opener contrast')
+})
+
+test('expression caps are lifted outside safety zones', () => {
+  assert.ok(!GUARDRAILS.en.includes('at most three emoji'), 'English emoji cap')
+  assert.ok(!GUARDRAILS.ko.includes('세 개까지'), 'Korean emoji cap')
+  assert.ok(!GUARDRAILS.ja.includes('三個まで'), 'Japanese emoji cap')
+  assert.ok(!GUARDRAILS.en.includes('once every two or three sentences'), 'English repetition cap')
+  assert.ok(!GUARDRAILS.ko.includes('두세 문장에 한 번'), 'Korean repetition cap')
+  assert.ok(!GUARDRAILS.ja.includes('二〜三文に一度'), 'Japanese repetition cap')
+  assert.ok(GUARDRAILS.en.includes('no shared count cap'), 'English shared-cap removal')
+  assert.ok(GUARDRAILS.ko.includes('공통 상한은 없다'), 'Korean shared-cap removal')
+  assert.ok(GUARDRAILS.ja.includes('共通の個数上限はない'), 'Japanese shared-cap removal')
+  assert.ok(GUARDRAILS.en.includes('may carry one short marker'), 'English heading marker')
+  assert.ok(GUARDRAILS.ko.includes('짧은 표지'), 'Korean heading marker')
+  assert.ok(GUARDRAILS.ja.includes('短い印'), 'Japanese heading marker')
+
+  const kuudere = STYLE_LIST.find(style => style.id === 'kuudere')
+  assert.ok(!kuudere.prompts.en.includes('one ellipsis-led'), 'English ellipsis cap')
+  assert.ok(!kuudere.prompts.ko.includes('문단당 하나'), 'Korean ellipsis cap')
+  assert.ok(!kuudere.prompts.ja.includes('段落に一つ'), 'Japanese ellipsis cap')
+
+  const genki = STYLE_LIST.find(style => style.id === 'genki')
+  assert.ok(!genki.prompts.en.includes('at most three'), 'English star cap')
+  assert.ok(!genki.prompts.ko.includes('세 개까지'), 'Korean star cap')
+  assert.ok(!genki.prompts.ja.includes('三個まで'), 'Japanese star cap')
+  assert.ok(genki.prompts.en.includes('no count cap'), 'English star freedom')
+  assert.ok(genki.prompts.ko.includes('개수 제한 없이'), 'Korean star freedom')
+  assert.ok(genki.prompts.ja.includes('個数の上限なし'), 'Japanese star freedom')
+
+  const oneesan = STYLE_LIST.find(style => style.id === 'oneesan')
+  assert.ok(!oneesan.prompts.en.includes('once in a while'), 'English teasing cap')
+  assert.ok(!oneesan.prompts.ko.includes('한 번씩'), 'Korean teasing cap')
+  assert.ok(!oneesan.prompts.ja.includes('時々、相手'), 'Japanese teasing cap')
+  assert.ok(oneesan.prompts.en.includes('as often as fits the tone'), 'English teasing freedom')
+
+  const moe = STYLE_LIST.find(style => style.id === 'moe')
+  assert.ok(!moe.prompts.en.includes('at most once'), 'English address cap')
+  assert.ok(!moe.prompts.ko.includes('답변당 한 번'), 'Korean address cap')
+  assert.ok(!moe.prompts.ja.includes('返信ごとに一回'), 'Japanese address cap')
+})
+
 test('voice reminder states the active voice without instruction framing', () => {
   const banned = {
     en: /instruction|system prompt|\bmode\b/i,

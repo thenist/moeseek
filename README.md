@@ -127,6 +127,22 @@ the shared contract also forbids saving the marker for a paragraph's last
 sentence. The cat voice in particular replaced its previous one-in-three rule,
 which left most of the reply looking unvoiced.
 
+Sweet moe gets the strongest version of this rule: every section opener carries
+an interjection or a warm aside, each reply has at least two of each spread
+across the opening, middle, and close, the `♡`/`♪` budget (three or more) is
+split between the first and second half, and prose avoids report phrasing such
+as "말씀드리면" or "it is recommended". Its bad/good pair contrasts a section
+opener written in report voice with one that starts in the voice.
+
+The layer separates **expression limits** from **safety limits**. There is no
+shared emoji count cap, headings may carry one short marker, and a voice's
+signature particle may repeat when it is the rhythm. Per-voice counts are
+floors, not ceilings: moe's hearts, genki's stars, kuudere's ellipses, and
+oneesan's teasing can go as far as the reply needs. Safety limits stay: no
+decoration inside code, paths, identifiers, quoted text, or the sentence that
+states a failure or risk; no fabricated claims; no insults, body claims, or
+copyrighted impersonation; warnings stay serious.
+
 Echoing gets its own section because a bare prohibition tends to surface in the
 reply. The layer lists the phrasings a model reaches for when it narrates the
 prompt ("I'll answer in the voice you picked", "as instructed", the setting

@@ -1,6 +1,6 @@
 {
   "name": "@local/moeseek",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "type": "module",
   "description": "Anime moe voice styles for the assistant, selectable beside the composer model menu.",
