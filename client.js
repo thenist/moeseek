@@ -53,6 +53,16 @@ window.__ModuleLoader__.load({
       'language.ko': 'Korean',
       'language.hint': 'Language of the voice rules the model reads — replies and this menu stay in your language',
       'language.unavailable': 'Restart DSH to enable prompt languages',
+      'settings.summary': 'Default voice and prompt language',
+      'settings.title': 'Default voice',
+      'settings.hint': 'New sessions start with this voice and prompt language. A session that picks its own voice with /moeseek or the Voice menu keeps that choice.',
+      'settings.style': 'Default style',
+      'settings.unavailable': 'Voice settings are not available in this profile.',
+      'settings.readOnly': 'This profile stores settings read-only.',
+      'settings.save': 'Save defaults',
+      'settings.saving': 'Saving…',
+      'settings.saved': 'Saved',
+      'settings.saveFailed': 'Could not save the defaults. Try again.',
       'style.off.label': 'Default',
       'style.off.hint': 'Keep the normal voice',
       'style.moe.label': 'Sweet moe',
@@ -88,6 +98,16 @@ window.__ModuleLoader__.load({
       'language.ko': '한국어',
       'language.hint': '모델이 읽는 말투 규칙의 언어입니다 — 답변과 이 메뉴는 사용자의 언어를 따릅니다',
       'language.unavailable': '프롬프트 언어를 사용하려면 DSH를 재시작하세요',
+      'settings.summary': '기본 말투와 프롬프트 언어',
+      'settings.title': '기본 말투',
+      'settings.hint': '새 세션은 이 말투와 프롬프트 언어로 시작합니다. 세션에서 /moeseek이나 말투 메뉴로 직접 고르면 그 선택이 유지됩니다.',
+      'settings.style': '기본 스타일',
+      'settings.unavailable': '이 프로필에서는 말투 설정을 사용할 수 없어요.',
+      'settings.readOnly': '이 프로필은 설정을 읽기 전용으로 저장해요.',
+      'settings.save': '기본값 저장',
+      'settings.saving': '저장 중…',
+      'settings.saved': '저장됨',
+      'settings.saveFailed': '기본값을 저장하지 못했어요. 다시 시도해 주세요.',
       'style.off.label': '기본',
       'style.off.hint': '원래 말투 그대로',
       'style.moe.label': '달콤 모에',
@@ -123,6 +143,16 @@ window.__ModuleLoader__.load({
       'language.ko': '韓国語',
       'language.hint': 'モデルが読む口調ルールの言語です — 返信とこのメニューはユーザーの言語のままです',
       'language.unavailable': 'プロンプト言語を使うには DSH を再起動してください',
+      'settings.summary': '既定の口調とプロンプト言語',
+      'settings.title': '既定の口調',
+      'settings.hint': '新しいセッションはこの口調とプロンプト言語で始まります。/moeseek や口調メニューで選んだセッションはその選択を保ちます。',
+      'settings.style': '既定のスタイル',
+      'settings.unavailable': 'このプロファイルでは口調設定を利用できません。',
+      'settings.readOnly': 'このプロファイルは設定を読み取り専用で保存します。',
+      'settings.save': '既定値を保存',
+      'settings.saving': '保存中…',
+      'settings.saved': '保存しました',
+      'settings.saveFailed': '既定値を保存できませんでした。もう一度お試しください。',
       'style.off.label': 'デフォルト',
       'style.off.hint': 'いつもの口調',
       'style.moe.label': '甘々モエ',
@@ -158,6 +188,16 @@ window.__ModuleLoader__.load({
       'language.ko': '韩语',
       'language.hint': '模型读取的语气规则语言 — 回复和此菜单仍使用你的语言',
       'language.unavailable': '重启 DSH 后可启用提示词语言',
+      'settings.summary': '默认语气和提示词语言',
+      'settings.title': '默认语气',
+      'settings.hint': '新会话以这个语气和提示词语言开始。通过 /moeseek 或语气菜单自行选择的会话会保留自己的选择。',
+      'settings.style': '默认风格',
+      'settings.unavailable': '此配置环境中无法使用语气设置。',
+      'settings.readOnly': '此配置环境以只读方式保存设置。',
+      'settings.save': '保存默认值',
+      'settings.saving': '保存中…',
+      'settings.saved': '已保存',
+      'settings.saveFailed': '未能保存默认值，请重试。',
       'style.off.label': '默认',
       'style.off.hint': '保持原本语气',
       'style.moe.label': '甜萌',
@@ -204,6 +244,24 @@ window.__ModuleLoader__.load({
 .moeseek-lang-chip:disabled,.moeseek-lang-chip[aria-disabled="true"]{color:var(--dsw-alias-label-dimmed);cursor:default;}
 .moeseek-lang-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .moeseek-hint{margin:2px 8px 3px;font-size:11px;line-height:16px;color:var(--dsw-alias-label-tertiary);}
+`
+
+    const SETTINGS_CSS = `
+.moeseek-defaults{display:flex;flex-direction:column;gap:12px;font-family:inherit;}
+.moeseek-defaults-hint{max-width:52ch;margin:0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary);}
+.moeseek-defaults-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.moeseek-defaults-field{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.moeseek-defaults-field label{font-size:13px;line-height:18px;font-weight:500;color:var(--dsw-alias-label-primary);}
+.moeseek-defaults-field select{box-sizing:border-box;min-height:32px;padding:4px 8px;border:0.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-md);background:var(--dsw-alias-bg-layer-3);color:var(--dsw-alias-label-primary);font-family:inherit;font-size:13px;}
+.moeseek-defaults-field select:disabled{color:var(--dsw-alias-label-dimmed);cursor:default;}
+.moeseek-defaults-field select:focus-visible{outline:var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:1px;}
+.moeseek-defaults-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;}
+.moeseek-defaults-status{min-width:0;font-size:12px;line-height:16px;color:var(--dsw-alias-label-secondary);}
+.moeseek-defaults-status[data-failed="true"]{color:var(--dsw-alias-label-error);}
+.moeseek-defaults-save{appearance:none;border:1px solid transparent;border-radius:var(--dsw-radius-md);padding:5px 14px;font:inherit;font-size:13px;line-height:1.5;cursor:pointer;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-layer-3);}
+.moeseek-defaults-save:disabled{opacity:0.4;cursor:default;}
+.moeseek-defaults-save:focus-visible{outline:var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:1px;}
+.moeseek-defaults-note{margin:0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-tertiary);}
 `
 
     /** Resolve one failure to localized copy without exposing raw Host text. */
@@ -391,6 +449,137 @@ window.__ModuleLoader__.load({
       h('div', { className: 'moeseek-hint', id: hintId }, hint))
     }
 
+    /** A known style id from a resolved settings value; the catalogue default otherwise. */
+    function styleIdOf(value) {
+      return STYLES.some(style => style.id === value) ? value : 'off'
+    }
+
+    /** A known prompt-language id from a resolved settings value; the catalogue default otherwise. */
+    function langIdOf(value) {
+      return LANGUAGES.includes(value) ? value : 'ko'
+    }
+
+    /**
+     * The moeseek row's configuration on the Plugins page: a summary line, and
+     * the form that writes the default voice and prompt language. The values and
+     * the revision fence come from the page's config form; the summary view
+     * receives no form, so it names the setting instead of reading it.
+     */
+    function DefaultVoiceSettings(props) {
+      const { t } = props
+      if (props.view === 'summary') return t('settings.summary')
+      const form = props.form
+      if (form === undefined) {
+        return h('p', { className: 'moeseek-defaults-note', role: 'status' }, t('settings.unavailable'))
+      }
+      if (form.state.status === 'loading') {
+        return h('p', { className: 'moeseek-defaults-note', role: 'status' }, t('loading'))
+      }
+      if (form.state.status === 'unavailable') {
+        return h('p', { className: 'moeseek-defaults-note', role: 'status' }, t('settings.unavailable'))
+      }
+      return h(DefaultVoiceForm, { t, form })
+    }
+
+    function DefaultVoiceForm({ t, form }) {
+      const snapshot = form.state
+      const value = snapshot.value !== null && typeof snapshot.value === 'object' ? snapshot.value : {}
+      const host = { style: styleIdOf(value.defaultStyle), lang: langIdOf(value.defaultLang) }
+      const [staged, setStaged] = useState(null)
+      const [optimistic, setOptimistic] = useState(null)
+      const [saving, setSaving] = useState(false)
+      const [failed, setFailed] = useState(false)
+      const [saved, setSaved] = useState(false)
+      const [hostKey, setHostKey] = useState(host.style + ':' + host.lang)
+      const nextKey = host.style + ':' + host.lang
+      // A save shows its own values until the page's next snapshot carries them.
+      // Any host change clears that optimism, so an external edit wins.
+      if (hostKey !== nextKey) {
+        setHostKey(nextKey)
+        setOptimistic(null)
+      }
+      const current = staged ?? optimistic ?? host
+      const dirty = staged !== null && (staged.style !== host.style || staged.lang !== host.lang)
+      const disabled = !snapshot.writable || saving
+      const styleInput = useId()
+      const langInput = useId()
+
+      const edit = (field, next) => {
+        if (next === current[field]) return
+        setStaged({ ...current, [field]: next })
+        setSaved(false)
+        setFailed(false)
+      }
+
+      const save = () => {
+        if (disabled || !dirty) return
+        const submitted = { style: current.style, lang: current.lang }
+        setSaving(true)
+        setFailed(false)
+        setSaved(false)
+        Promise.resolve()
+          .then(() => form.mutate([
+            { op: 'set', path: ['defaultStyle'], value: submitted.style },
+            { op: 'set', path: ['defaultLang'], value: submitted.lang },
+          ], snapshot.revision))
+          .then((accepted) => {
+            setSaving(false)
+            if (!accepted) {
+              setFailed(true)
+              return
+            }
+            setOptimistic(submitted)
+            setStaged(null)
+            setSaved(true)
+          })
+          .catch((error) => {
+            setSaving(false)
+            setFailed(true)
+            console.warn('[moeseek] default voice save failed', error)
+          })
+      }
+
+      const statusText = failed ? t('settings.saveFailed') : saved ? t('settings.saved') : ''
+
+      return h('section', { className: 'moeseek-defaults', 'aria-label': t('settings.title') },
+        h('style', null, SETTINGS_CSS),
+        h('p', { className: 'moeseek-defaults-hint' }, t('settings.hint')),
+        snapshot.writable
+          ? null
+          : h('p', { className: 'moeseek-defaults-note', role: 'status' }, t('settings.readOnly')),
+        h('div', { className: 'moeseek-defaults-grid' },
+          h('div', { className: 'moeseek-defaults-field' },
+            h('label', { htmlFor: styleInput }, t('settings.style')),
+            h('select', {
+              id: styleInput,
+              value: current.style,
+              disabled,
+              onChange: (event) => { edit('style', styleIdOf(event.target.value)) },
+            }, STYLES.map(style => h('option', { key: style.id, value: style.id },
+              t('style.' + style.id + '.label'))))),
+          h('div', { className: 'moeseek-defaults-field' },
+            h('label', { htmlFor: langInput }, t('language')),
+            h('select', {
+              id: langInput,
+              value: current.lang,
+              disabled,
+              onChange: (event) => { edit('lang', langIdOf(event.target.value)) },
+            }, LANGUAGES.map(code => h('option', { key: code, value: code }, t('language.' + code)))))),
+        h('div', { className: 'moeseek-defaults-foot' },
+          h('span', {
+            className: 'moeseek-defaults-status',
+            role: 'status',
+            'aria-live': 'polite',
+            'data-failed': failed ? 'true' : undefined,
+          }, statusText),
+          h('button', {
+            type: 'button',
+            className: 'moeseek-defaults-save',
+            disabled: disabled || !dirty,
+            onClick: save,
+          }, saving ? t('settings.saving') : t('settings.save'))))
+    }
+
     return {
       inject: ['slots', 'sessions', 'locale'],
       apply(ctx) {
@@ -427,6 +616,14 @@ window.__ModuleLoader__.load({
             }
           },
         }, VoiceOptions))
+
+        // Settings → Plugins → moeseek → the row's configuration. The key is
+        // the bundle name plus the row id its patch inserts.
+        ctx.slots.inject('plugins.row.config', () => ctx.slots.register({
+          name: 'plugins.row.config',
+          key: '@local/moeseek#moeseek',
+          locale: NS,
+        }, DefaultVoiceSettings))
       },
     }
   },

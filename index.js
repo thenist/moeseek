@@ -9,25 +9,32 @@
  * context carries the short reminder, both in the selected prompt language.
  * The `/moeseek` command is the single write path used by the composer menu.
  *
- * No Harness package is imported: every service is reached through `ctx`, so
- * the bundle installs without dependency resolution.
+ * A session that never invokes `/moeseek` starts from the configured default
+ * selection — `defaultStyle` and `defaultLang` in `config.js` — which the DSH
+ * Settings → Plugins page edits as volatile fields. The defaults are read when
+ * a session's projection is first materialized, so a settings write reaches
+ * the next session, while a session whose own choice is in the event log keeps
+ * that choice. `config.js` imports `@deepseek-ai/schemastery`, which resolves
+ * from the DSH installation like every Harness package a bundle imports.
  */
 
+import { Config } from './config.js'
 import {
-  DEFAULT_LANG,
   LANGS,
-  LANG_IDS,
   STYLES,
-  STYLE_IDS,
   contextFor,
+  defaultsFrom,
   langFor,
   langIdList,
+  normalizeState,
   parseRequest,
   promptFor,
   styleIdList,
   viewOf,
   voiceFor,
 } from './styles.js'
+
+export { Config }
 
 /** Services the host half needs; the command child is optional. */
 export const inject = ['agents', 'sessionProjections', 'systemPrompt']
@@ -38,43 +45,48 @@ const CONTEXT_NAME = 'moeseek:voice-reminder'
 const SECTION_ORDER = 11000
 const CONTEXT_ORDER = 950
 
-/** Normalize one persisted projection value; old or partial rows fall back safely. */
-function normalizeState(value) {
-  const raw = value !== null && typeof value === 'object' ? value : {}
-  return {
-    style: STYLE_IDS.has(raw.style) ? raw.style : 'off',
-    lang: LANG_IDS.has(raw.lang) ? raw.lang : DEFAULT_LANG,
-  }
-}
-
 /**
  * Structural schemas: the projection registry only calls `parse`, and avoiding
- * a Zod import keeps this bundle dependency-free.
+ * extra imports keeps this module small. `defaults` is read per parse, so a
+ * settings write reaches a session whose state is materialized afterwards.
  */
-function stateSchema() {
-  return { parse: normalizeState }
+function stateSchema(defaults) {
+  return { parse: value => normalizeState(value, defaults()) }
 }
 
-function viewSchema() {
-  return { parse: normalizeState }
+function viewSchema(defaults) {
+  return { parse: value => normalizeState(value, defaults()) }
+}
+
+/** Read one Config field, accepting both a volatile reference and a plain value. */
+function configValue(field) {
+  if (field !== null && typeof field === 'object' && typeof field.get === 'function') return field.get()
+  return field
 }
 
 /**
  * Register the session projection, per-agent prompt layers, and the command.
  * @param ctx - the plugin context.
+ * @param config - the validated Config; its default selection is read live.
  */
-export async function apply(ctx) {
+export async function apply(ctx, config) {
+  /** The default selection; read live so a volatile settings write reaches the next session. */
+  const defaults = () => defaultsFrom(configValue(config?.defaultStyle), configValue(config?.defaultLang))
+
   /** @type {{ stateOf(session: unknown): { style: string, lang: string } } | undefined} */
   let projection
 
   const selectionOfSession = (session) => {
-    const fallback = { voice: voiceFor('off'), lang: langFor(DEFAULT_LANG) }
-    if (projection === undefined) return fallback
+    const fallback = () => {
+      const value = defaults()
+      return { voice: voiceFor(value.style), lang: langFor(value.lang) }
+    }
+    if (projection === undefined) return fallback()
     try {
-      const state = projection.stateOf(session)
-      return { voice: voiceFor(state?.style), lang: langFor(state?.lang) }
+      const state = normalizeState(projection.stateOf(session), defaults())
+      return { voice: voiceFor(state.style), lang: langFor(state.lang) }
     } catch {
-      return fallback
+      return fallback()
     }
   }
 
@@ -130,9 +142,9 @@ export async function apply(ctx) {
 
   projection = await ctx.sessionProjections.register({
     key: PROJECTION_KEY,
-    stateVersion: 2,
-    stateSchema: stateSchema(),
-    init: () => ({ style: 'off', lang: DEFAULT_LANG }),
+    stateVersion: 3,
+    stateSchema: stateSchema(defaults),
+    init: () => ({ ...defaults() }),
     apply(state, event) {
       if (event.type !== 'command/run' || event.data.name !== 'moeseek') return state
       const request = parseRequest(event.data.args)
@@ -143,8 +155,11 @@ export async function apply(ctx) {
       return { style, lang }
     },
     wire: {
-      viewSchema: viewSchema(),
-      view: state => viewOf(state.style, state.lang),
+      viewSchema: viewSchema(defaults),
+      view: state => {
+        const value = normalizeState(state, defaults())
+        return viewOf(value.style, value.lang)
+      },
     },
   })
 
@@ -160,9 +175,11 @@ export async function apply(ctx) {
         const request = parseRequest(rawInput)
 
         if (request.kind === 'info') {
+          const configured = defaults()
+          const defaultVoice = voiceFor(configured.style)
           return {
             kind: 'success',
-            text: `${selection.voice.emoji} Current voice: ${selection.voice.names.en} · Prompt language: ${selection.lang.en} · Styles: ${styleIdList()} · Languages: ${langIdList()}`,
+            text: `${selection.voice.emoji} Current voice: ${selection.voice.names.en} · Prompt language: ${selection.lang.en} · New-session default: ${defaultVoice.names.en} (${configured.lang}) · Styles: ${styleIdList()} · Languages: ${langIdList()}`,
           }
         }
         if (request.kind === 'invalid') {

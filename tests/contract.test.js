@@ -5,6 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   DEFAULT_LANG,
+  DEFAULT_STYLE,
   GUARDRAILS,
   LANG_IDS,
   LANG_LIST,
@@ -12,8 +13,10 @@ import {
   STYLE_IDS,
   VIEWS,
   contextFor,
+  defaultsFrom,
   langFor,
   langIdList,
+  normalizeState,
   parseRequest,
   promptFor,
   styleIdList,
@@ -43,10 +46,25 @@ test('host catalogue and ids', () => {
   assert.deepEqual([...STYLE_IDS], ['off', 'moe', 'cat', 'tsundere', 'kuudere', 'genki', 'oneesan'])
   assert.equal(LANG_LIST.length, 3)
   assert.equal(DEFAULT_LANG, 'ko')
+  assert.equal(DEFAULT_STYLE, 'off')
   assert.equal(styleIdList(), 'off, moe, cat, tsundere, kuudere, genki, oneesan')
   assert.equal(langIdList(), 'en, ja, ko')
   assert.equal(voiceFor('missing').id, 'off')
   assert.equal(langFor('missing').id, DEFAULT_LANG)
+})
+
+test('configured defaults resolve to catalogue ids', () => {
+  assert.deepEqual(defaultsFrom(undefined, undefined), { style: 'off', lang: 'ko' })
+  assert.deepEqual(defaultsFrom('moe', 'ja'), { style: 'moe', lang: 'ja' })
+  assert.deepEqual(defaultsFrom('bogus', 'bogus'), { style: 'off', lang: 'ko' })
+
+  const configured = defaultsFrom('cat', 'en')
+  assert.deepEqual(normalizeState(null, configured), { style: 'cat', lang: 'en' })
+  assert.deepEqual(normalizeState({}, configured), { style: 'cat', lang: 'en' })
+  assert.deepEqual(normalizeState({ style: 'genki' }, configured), { style: 'genki', lang: 'en' })
+  assert.deepEqual(normalizeState({ lang: 'ja' }, configured), { style: 'cat', lang: 'ja' })
+  assert.deepEqual(normalizeState({ style: 'off', lang: 'ko' }, configured), { style: 'off', lang: 'ko' })
+  assert.deepEqual(normalizeState({ style: 'bogus', lang: 'bogus' }, configured), { style: 'cat', lang: 'en' })
 })
 
 test('command grammar', () => {

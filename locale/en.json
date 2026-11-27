@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Moeseek",
-    "description": "Turns the assistant's chat prose into an exaggerated anime moe voice. Open the composer model menu, find Voice below Model and Effort, and pick a style plus a separate Prompt language (English, Japanese, or Korean), or run /moeseek <style> [en|ja|ko] or /moeseek lang <code>. The choice is saved per session and survives resume. The Host adds the guardrails and voice rules written in the selected prompt language to the system prompt, plus a short reminder as dynamic context; the model is instructed to keep code, paths, commands, numbers, file contents, and technical accuracy free of the voice. The menu stays open to show the confirmation; a change applies from the next request."
+    "description": "Turns the assistant's chat prose into an exaggerated anime moe voice. Open the composer model menu, find Voice below Model and Effort, and pick a style plus a separate Prompt language (English, Japanese, or Korean), or run /moeseek <style> [en|ja|ko] or /moeseek lang <code>. The pair a new session starts with is configurable on the plugin's row in Settings → Plugins. The choice is saved per session and survives resume. The Host adds the guardrails and voice rules written in the selected prompt language to the system prompt, plus a short reminder as dynamic context; the model is instructed to keep code, paths, commands, numbers, file contents, and technical accuracy free of the voice. The menu stays open to show the confirmation; a change applies from the next request."
   }
 }

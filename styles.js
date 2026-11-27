@@ -9,6 +9,7 @@
  */
 
 const DEFAULT_LANG = 'ko'
+const DEFAULT_STYLE = 'off'
 
 const GUARDRAILS = {
   en: `## Moeseek voice layer
@@ -949,6 +950,34 @@ const VIEWS = Object.freeze(Object.fromEntries(
   ])),
 ))
 
+/**
+ * Resolve one configured default selection to known ids, falling back to the
+ * catalogue defaults for an unknown style or prompt language.
+ * @param style - configured style id.
+ * @param lang - configured prompt-language id.
+ */
+function defaultsFrom(style, lang) {
+  return {
+    style: STYLE_IDS.has(style) ? style : DEFAULT_STYLE,
+    lang: LANG_IDS.has(lang) ? lang : DEFAULT_LANG,
+  }
+}
+
+/**
+ * Normalize one persisted projection value; an absent or unknown field falls
+ * back to the configured default for that field.
+ * @param value - raw persisted state.
+ * @param defaults - resolved default selection; catalogue defaults when omitted.
+ */
+function normalizeState(value, defaults = defaultsFrom()) {
+  const raw = value !== null && typeof value === 'object' ? value : {}
+  const fallback = defaultsFrom(defaults.style, defaults.lang)
+  return {
+    style: STYLE_IDS.has(raw.style) ? raw.style : fallback.style,
+    lang: LANG_IDS.has(raw.lang) ? raw.lang : fallback.lang,
+  }
+}
+
 /** Resolve a requested voice id to a known voice, falling back to `off`. */
 function voiceFor(id) {
   return STYLES.get(typeof id === 'string' ? id : 'off') ?? STYLES.get('off')
@@ -1030,6 +1059,7 @@ function langIdList() {
 
 export {
   DEFAULT_LANG,
+  DEFAULT_STYLE,
   GUARDRAILS,
   LANGS,
   LANG_IDS,
@@ -1039,8 +1069,10 @@ export {
   STYLE_IDS,
   VIEWS,
   contextFor,
+  defaultsFrom,
   langFor,
   langIdList,
+  normalizeState,
   parseRequest,
   promptFor,
   styleIdList,

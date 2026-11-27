@@ -3,7 +3,8 @@
 Anime moe voice styles for the assistant in DeepSeek Harness. Pick a style and
 a prompt language inside the composer model menu, and the assistant keeps its
 technical accuracy while its chat prose turns sweet, cat-like, prickly, quiet,
-explosive, or doting.
+explosive, or doting. The pair a new session starts with is configurable on the
+plugin's row in **Settings → Plugins**.
 
 ## Use it
 
@@ -64,6 +65,32 @@ reports `Applying` and then `Applied`. Escape or a click outside closes the
 menu. On a failure, a toast explains the reason instead of exposing the raw
 Host error.
 
+### Default voice for new sessions
+
+The voice and prompt language a session starts with are configurable in DSH
+Settings. Open **Settings → Plugins → Installed → moeseek**, open the
+`moeseek` row, and use **Default style**, **Prompt language**, and **Save
+defaults**.
+
+The two values are volatile Config fields, so the Plugins page edits them in
+place and the write lands in the active profile patch. They can be set there
+directly instead:
+
+```yaml
+- id: moeseek
+  config:
+    defaultStyle: moe
+    defaultLang: ko
+```
+
+A session that never invokes `/moeseek` starts from this default. A session
+that picks its own voice keeps that choice, and changing the default never
+rewrites an existing session's saved selection. The built-in fallbacks remain
+`off` (the normal assistant voice) and `ko`. A session whose voice state is
+materialized after the settings write sees the new default; one whose state is
+already in memory keeps the selection it started with until the plugin's
+projection is rebuilt.
+
 ### UI language and prompt language
 
 The English dictionary stays English. This DSH Web release ships English,
@@ -94,6 +121,11 @@ voice rules.
   `/moeseek` invocation from durable `command/run` events. It stores both the
   style and the prompt language, so the choice survives resume and needs no
   custom event type.
+- **Configurable default**: two volatile Config fields (`defaultStyle`,
+  `defaultLang`) back the row's page in Settings → Plugins and the same keys in
+  the profile patch. The projection's `init` reads them live, so a session
+  without its own choice starts from the current default while a recorded
+  `/moeseek` choice still wins.
 - **One write path**: the menu submits the same `/moeseek` command line as the
   slash command; the durable projection frame is the confirmation.
 
@@ -166,12 +198,15 @@ character.
 - The voice and prompt language apply from the next request; a running step
   keeps the prompt it assembled.
 - The prompt language defaults to Korean. It can be changed per session and is
-  remembered independently of the UI locale.
+  remembered independently of the UI locale; `defaultLang` changes it for
+  sessions that have not chosen one.
 - Subagent sessions and generated session titles are not voiced by this plugin.
-- The style and language catalogues are fixed in `styles.js`; there is no
-  configuration knob.
+- The style and language catalogues are fixed in `styles.js`; configuration
+  chooses the default pair, not new voices.
 - The menu needs the Web composer's model selection surface. Without it, use
   `/moeseek <style> [en|ja|ko]` from any command-capable client.
+- The default-voice page needs Settings → Plugins. Without that page, set
+  `defaultStyle` and `defaultLang` in the profile patch directly.
 - The style is tone-only. It does not change tools, permissions, models, or
   answer length. The guardrails are prompt instructions, not a hard filter.
 - The layer is intentionally verbose, several thousand characters per voice,
@@ -186,13 +221,15 @@ character.
 | File | Role |
 |---|---|
 | `index.js` | Host plugin: projection, per-agent prompt layers, `/moeseek` command. |
+| `config.js` | Host Config: the volatile `defaultStyle` and `defaultLang` fields. |
 | `styles.js` | Guardrails, seven voice definitions, three prompt languages, command grammar. |
-| `client.js` | Web client: the **Voice** group (style grid + prompt-language box) and locale dictionaries. |
+| `client.js` | Web client: the **Voice** group (style grid + prompt-language box), the row's default-voice page, and locale dictionaries. |
 | `cordis.patch.yml` | Inserts the `moeseek` Host row. |
 | `locale/*.json` | Plugin Manager title and description in English, Korean, Japanese, and Chinese. |
 | `icon.svg` | Original cat-eared speech-bubble icon. |
-| `tests/contract.test.js` | Catalogue, grammar, fold, prompt-language, delivery-contract, and locale-parity tests; run `node --test tests/contract.test.js` (or `pnpm test`). |
+| `tests/contract.test.js` | Catalogue, default-selection, grammar, fold, prompt-language, delivery-contract, and locale-parity tests; run `node --test tests/contract.test.js` (or `pnpm test`). |
 
-The Host half imports no Harness package, so the bundle installs without
-resolving extra dependencies. The client half uses only the browser's React
-module and host theme tokens.
+The Host half imports only `@deepseek-ai/schemastery`, which the DSH
+installation supplies through its runtime resolution; the bundle installs no
+dependency of its own. The client half uses only the browser's React module and
+host theme tokens.
