@@ -10,12 +10,13 @@
  * The `/moeseek` command is the single write path used by the composer menu.
  *
  * A session that never invokes `/moeseek` starts from the configured default
- * selection — `defaultStyle` and `defaultLang` in `config.js` — which the DSH
- * Settings → Plugins page edits as volatile fields. The defaults are read when
- * a session's projection is first materialized, so a settings write reaches
- * the next session, while a session whose own choice is in the event log keeps
- * that choice. `config.js` imports `@deepseek-ai/schemastery`, which resolves
- * from the DSH installation like every Harness package a bundle imports.
+ * selection — `defaultStyle` and `defaultLang` in `config.js` — which the plugin
+ * manager's row page in the sidebar's Plugins panel edits as volatile fields.
+ * The defaults are read when a session's projection is first materialized, so
+ * a settings write reaches the next session, while a session whose own choice
+ * is in the event log keeps that choice. `config.js` imports
+ * `@deepseek-ai/schemastery`, which resolves from the DSH installation like
+ * every Harness package a bundle imports.
  */
 
 import { Config } from './config.js'

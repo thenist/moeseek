@@ -4,7 +4,7 @@ Anime moe voice styles for the assistant in DeepSeek Harness. Pick a style and
 a prompt language inside the composer model menu, and the assistant keeps its
 technical accuracy while its chat prose turns sweet, cat-like, prickly, quiet,
 explosive, or doting. The pair a new session starts with is configurable on the
-plugin's row in **Settings → Plugins**.
+plugin's row in the sidebar's **Plugins** panel.
 
 ## Use it
 
@@ -67,14 +67,18 @@ Host error.
 
 ### Default voice for new sessions
 
-The voice and prompt language a session starts with are configurable in DSH
-Settings. Open **Settings → Plugins → Installed → moeseek**, open the
-`moeseek` row, and use **Default style**, **Prompt language**, and **Save
-defaults**.
+The voice and prompt language a session starts with are configurable. Open the
+**Plugins** panel in the sidebar (the pinwheel icon), switch to **Installed**,
+open **Moeseek**, and click the `moeseek` row to reach **Default voice**. Use
+**Default style**, **Prompt language**, and **Save defaults**.
 
-The two values are volatile Config fields, so the Plugins page edits them in
-place and the write lands in the active profile patch. They can be set there
-directly instead:
+Settings → **Built-in plugins** is only the read-only plugin inventory; it
+does not show this form. The configuration page lives on the plugin manager's
+row page, which is the sidebar's Plugins panel.
+
+The two values are volatile Config fields, so the row page edits them in place
+and the write lands in the active profile patch. They can be set there directly
+instead:
 
 ```yaml
 - id: moeseek
@@ -122,10 +126,10 @@ voice rules.
   style and the prompt language, so the choice survives resume and needs no
   custom event type.
 - **Configurable default**: two volatile Config fields (`defaultStyle`,
-  `defaultLang`) back the row's page in Settings → Plugins and the same keys in
-  the profile patch. The projection's `init` reads them live, so a session
-  without its own choice starts from the current default while a recorded
-  `/moeseek` choice still wins.
+  `defaultLang`) back the row's page in the sidebar's Plugins panel and the
+  same keys in the profile patch. The projection's `init` reads them live, so
+  a session without its own choice starts from the current default while a
+  recorded `/moeseek` choice still wins.
 - **One write path**: the menu submits the same `/moeseek` command line as the
   slash command; the durable projection frame is the confirmation.
 
@@ -205,8 +209,8 @@ character.
   chooses the default pair, not new voices.
 - The menu needs the Web composer's model selection surface. Without it, use
   `/moeseek <style> [en|ja|ko]` from any command-capable client.
-- The default-voice page needs Settings → Plugins. Without that page, set
-  `defaultStyle` and `defaultLang` in the profile patch directly.
+- The default-voice page needs the sidebar's Plugins panel. Without that page,
+  set `defaultStyle` and `defaultLang` in the profile patch directly.
 - The style is tone-only. It does not change tools, permissions, models, or
   answer length. The guardrails are prompt instructions, not a hard filter.
 - The layer is intentionally verbose, several thousand characters per voice,

@@ -617,8 +617,8 @@ window.__ModuleLoader__.load({
           },
         }, VoiceOptions))
 
-        // Settings → Plugins → moeseek → the row's configuration. The key is
-        // the bundle name plus the row id its patch inserts.
+        // The sidebar's Plugins panel → the moeseek row's configuration page.
+        // The key is the bundle name plus the row id its patch inserts.
         ctx.slots.inject('plugins.row.config', () => ctx.slots.register({
           name: 'plugins.row.config',
           key: '@local/moeseek#moeseek',

@@ -2,8 +2,10 @@
  * moeseek — Host configuration.
  *
  * Two volatile fields set the voice a session starts with. Volatile fields are
- * the ones the DSH Settings → Plugins page renders and edits: the write lands
- * in the active profile patch and takes effect without remounting the plugin.
+ * the ones the plugin manager's row page renders and edits: the write lands in
+ * the active profile patch and takes effect without remounting the plugin.
+ * That page is the `moeseek` row inside the sidebar's Plugins panel, not the
+ * read-only inventory under Settings → Built-in plugins.
  * `index.js` reads them when a session projection is first materialized, so a
  * change reaches sessions that have not chosen a voice and never rewrites a
  * session whose own `/moeseek` choice is already in the event log.
